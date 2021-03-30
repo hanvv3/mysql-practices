@@ -24,7 +24,7 @@ insert
 	into pets
 values('마음이','kickscar','dog','m','2015-12-25','2021-03-30');
 
--- select
+-- select(R)
 select * from pets;
 
 select name,birth from pets;
@@ -34,5 +34,10 @@ select name,birth from pets order by birth desc;
 
 select count(*) from pets;
 select count(*) from pets where death is not null;
+
+-- update(U)
+update pets
+	set species='monkey'
+where name='choco';
 
 
