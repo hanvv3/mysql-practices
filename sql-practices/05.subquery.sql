@@ -38,7 +38,7 @@ select a.emp_no, b.first_name
  order by a.salary desc;
 
 
-# where의 조건식에 서브쿼리를 사용하고 결과가 다중행인 경우 							# 다시 보기!
+# where의 조건식에 서브쿼리를 사용하고 결과가 다중행인 경우 						# 다시 보기!-postponed
 # in(not in)
 # any: =any(in 동일), >any, <any, <>any(!=any), <=any, >=any
 # all: =all, >all, <all, <>all(!=in, not in), <=all, >=all
@@ -106,7 +106,7 @@ group by title
 
 
 # 강사님 코드
-  select a.title, round(avg(salary)) as avg_salary						# 다시 고치기!
+  select a.title, round(avg(salary)) as avg_salary					# 다시 고치기!-done
     from titles a, salaries b
    where a.emp_no = b.emp_no
 	 and a.to_date = '9999-01-01'
@@ -172,7 +172,7 @@ group by a.dept_no;
 	 and b.to_date = '9999-01-01'
 group by a.dept_no;
 
--- answer5) 																# 다시해보기!
+-- answer5) 													# 다시해보기! -done
 select a.first_name, d.dept_name, c.salary
 from employees a, 
 	 dept_emp b, 
