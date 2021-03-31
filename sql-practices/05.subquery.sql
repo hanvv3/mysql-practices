@@ -38,7 +38,7 @@ select a.emp_no, b.first_name
  order by a.salary desc;
 
 
-# where의 조건식에 서브쿼리를 사용하고 결과가 다중행인 경우 
+# where의 조건식에 서브쿼리를 사용하고 결과가 다중행인 경우 							# 다시 보기!
 # in(not in)
 # any: =any(in 동일), >any, <any, <>any(!=any), <=any, >=any
 # all: =all, >all, <all, <>all(!=in, not in), <=all, >=all
@@ -86,42 +86,85 @@ order by b.salary;
 -- ex4.1) subquery
 -- 현재 가장 적은 평균급여의 직책과 그 평균급여를 출력 
 
+-- min wage
+  select title, round(avg(salary)) as avg_salary
+	from titles a, salaries b
+   where a.emp_no = b.emp_no
+	 and a.to_date = '9999-01-01'
+	 and b.to_date = '9999-01-01'
+group by title
+  having avg_salary = (select min(avg_salary)
+					     from (  select title, round(avg(salary)) as avg_salary
+								   from titles a, salaries b
+								  where a.emp_no = b.emp_no
+								    and a.to_date = '9999-01-01'
+								    and b.to_date = '9999-01-01'
+							   group by title) a);
+
+
+
+
+
+# 강사님 코드
   select a.title, round(avg(salary)) as avg_salary						# 다시 고치기!
     from titles a, salaries b
    where a.emp_no = b.emp_no
 	 and a.to_date = '9999-01-01'
      and b.to_date = '9999-01-01'
 group by a.title
-  having avg(salary) = (select min(avg_salary)
-						  from (  select a.title, round(avg(salary)) as avg_salary
-								    from titles a, salaries b
-								   where a.emp_no = b.emp_no
-								     and a.to_date = '9999-01-01'
-								     and b.to_date = '9999-01-01'
-								group by a.title) a);
+  having avg_salary = (select min(avg_salary)
+						 from (  select a.title, round(avg(salary)) as avg_salary
+								   from titles a, salaries b
+								  where a.emp_no = b.emp_no
+									and a.to_date = '9999-01-01'
+									and b.to_date = '9999-01-01'
+							   group by a.title) a);
 
--- ex4.2) top-k
-  select b.title, avg(salary) as avg_salary
+-- ex4.2) top-k									# limit 사용: 0(처음)부터, 1(횟수)
+  select b.title, round(avg(salary)) as avg_salary
     from salaries a, titles b
    where a.emp_no = b.emp_no
 	 and a.to_date = '9999-01-01'
 	 and b.to_date = '9999-01-01'
 group by b.title
 order by avg_salary asc
-   limit 0, 1;
+   limit 0, 1;									# 한마디로 물리적으로 다음으로 진행을 안한것 
 
 -- ex5)
 -- 현재 각 부서별로 최고 급여를 받는 사원의 이름과 급여를 출력 
+select dept_name as '부서', concat(a.first_name,' ',a.last_name) as '이름', max_salary as '급여'
+	from employees a, 
+		 salaries b, 
+         dept_emp c, 
+         departments d,
+         (  select dept_no, max(salary) as max_salary	# 부서별 최고급여 테이블
+			  from dept_emp a, salaries b
+			 where a.emp_no = b.emp_no
+			   and a.to_date = '9999-01-01'
+			   and b.to_date = '9999-01-01'
+		  group by a.dept_no) e							# alias 'e'
+   where a.emp_no = b.emp_no
+	 and b.emp_no = c.emp_no
+	 and c.dept_no = d.dept_no
+     and d.dept_no = e.dept_no			# subquery e와 Join
+     and salary = max_salary			# 최고급여와 비교, join
+	 and b.to_date = '9999-01-01'
+	 and c.to_date = '9999-01-01'
+order by max_salary desc;
 
-select a.first_name, b.salary
-from employees a, salaries b, dept_emp c, departments d
+-- sol5) 먼저 부서당 최고연봉(max salary)을 구한다 
+select dept_no, max(salary) as max_salary
+from dept_emp a, salaries b
 where a.emp_no = b.emp_no
-and b.emp_no = c.emp_no
-and c.dept_no = d.dept_no
+and a.to_date = '9999-01-01'
 and b.to_date = '9999-01-01'
-and c.to_date = '9999-01-01';
+group by a.dept_no;
 
--- sol5) 먼저 max salary를 구한다 
+
+
+
+# 강사님 코드
+-- max_salary먼저 구함 
   select a.dept_no, max(b.salary) as max_salary
 	from dept_emp a, salaries b
    where a.emp_no = b.emp_no
